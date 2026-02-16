@@ -3,3 +3,8 @@ uvicorn
 sqlalchemy
 psycopg2-binary
 pydantic
+
+scikit-learn
+pandas
+numpy
+joblib
