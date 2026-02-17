@@ -1,13 +1,30 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>frontend</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>BurnoutGuard AI</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <h1>BurnoutGuard AI</h1>
+
+    <div class="card">
+        <h2>Add Employee</h2>
+        <input id="name" placeholder="Name">
+        <input id="department" placeholder="Department">
+        <input id="weekly_hours" type="number" placeholder="Weekly Work Hours">
+        <input id="overtime" type="number" placeholder="Overtime Hours">
+        <input id="meeting" type="number" placeholder="Meeting Hours">
+        <input id="performance" type="number" placeholder="Performance Score">
+
+        <button onclick="addEmployee()">Add Employee</button>
+    </div>
+
+    <div class="card">
+        <h2>Employees</h2>
+        <div id="employeeList"></div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
 </html>
