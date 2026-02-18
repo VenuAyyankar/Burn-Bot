@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+*.pyo
+burnout.db
+.git
+.DS_Store
+data/

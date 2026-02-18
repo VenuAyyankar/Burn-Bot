@@ -8,3 +8,5 @@ scikit-learn
 pandas
 numpy
 joblib
+python-multipart
+openpyxl

@@ -1,30 +1,382 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
-    <title>BurnoutGuard AI</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BurnoutGuard AI – Employee Wellness Dashboard</title>
+    <meta name="description" content="AI-powered employee burnout detection and analytics dashboard">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
-    <h1>BurnoutGuard AI</h1>
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <div class="logo-icon"><i data-lucide="shield-check"></i></div>
+                <span class="logo-text">BurnoutGuard</span>
+            </div>
+            <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle sidebar">
+                <i data-lucide="panel-left-close"></i>
+            </button>
+        </div>
 
-    <div class="card">
-        <h2>Add Employee</h2>
-        <input id="name" placeholder="Name">
-        <input id="department" placeholder="Department">
-        <input id="weekly_hours" type="number" placeholder="Weekly Work Hours">
-        <input id="overtime" type="number" placeholder="Overtime Hours">
-        <input id="meeting" type="number" placeholder="Meeting Hours">
-        <input id="performance" type="number" placeholder="Performance Score">
+        <nav class="sidebar-nav">
+            <a href="#dashboard" class="nav-item active" data-page="dashboard" id="nav-dashboard">
+                <i data-lucide="layout-dashboard"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="#add" class="nav-item" data-page="add" id="nav-add">
+                <i data-lucide="user-plus"></i>
+                <span>Add Employee</span>
+            </a>
+            <a href="#employees" class="nav-item" data-page="employees" id="nav-employees">
+                <i data-lucide="users"></i>
+                <span>Employees</span>
+            </a>
+            <a href="#analytics" class="nav-item" data-page="analytics" id="nav-analytics">
+                <i data-lucide="bar-chart-3"></i>
+                <span>Analytics</span>
+            </a>
+        </nav>
 
-        <button onclick="addEmployee()">Add Employee</button>
+        <div class="sidebar-footer">
+            <div class="sidebar-badge">
+                <i data-lucide="sparkles"></i>
+                <span>AI Powered</span>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Mobile Header -->
+    <header class="mobile-header" id="mobileHeader">
+        <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Open menu">
+            <i data-lucide="menu"></i>
+        </button>
+        <div class="mobile-logo">
+            <div class="logo-icon small"><i data-lucide="shield-check"></i></div>
+            <span>BurnoutGuard</span>
+        </div>
+    </header>
+
+    <!-- Overlay for mobile sidebar -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- Main Content -->
+    <main class="main-content" id="mainContent">
+
+        <!-- ===== DASHBOARD PAGE ===== -->
+        <section class="page active" id="page-dashboard">
+            <div class="page-header">
+                <div>
+                    <h1 class="page-title">Dashboard</h1>
+                    <p class="page-subtitle">Employee wellness overview at a glance</p>
+                </div>
+                <div style="display:flex;gap:10px;align-items:center">
+                    <a href="#" id="downloadTemplateBtn" class="btn btn-secondary btn-sm" style="text-decoration:none">
+                        <i data-lucide="file-spreadsheet"></i> Template
+                    </a>
+                    <input type="file" id="uploadFileInput" accept=".csv,.xlsx,.xls" style="display:none">
+                    <button class="btn btn-primary" id="uploadBtn">
+                        <i data-lucide="upload"></i>
+                        <span>Upload Data</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Dataset Selector -->
+            <div class="dataset-selector" id="datasetSelector">
+                <div class="dataset-selector-header">
+                    <h3 class="dataset-selector-title"><i data-lucide="database"></i> Datasets</h3>
+                    <button class="btn btn-secondary btn-sm" id="createDatasetBtn">
+                        <i data-lucide="plus"></i><span>New Dataset</span>
+                    </button>
+                </div>
+                <div class="dataset-chips" id="datasetChips">
+                    <button class="dataset-chip active" data-dataset-id="">
+                        <i data-lucide="layers"></i> All Data
+                    </button>
+                    <!-- Dynamic chips added by JS -->
+                </div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card" id="stat-total">
+                    <div class="stat-icon blue"><i data-lucide="users"></i></div>
+                    <div class="stat-info">
+                        <span class="stat-value" data-target="0" id="statTotalEmployees">0</span>
+                        <span class="stat-label">Total Employees</span>
+                    </div>
+                </div>
+                <div class="stat-card" id="stat-avg">
+                    <div class="stat-icon amber"><i data-lucide="activity"></i></div>
+                    <div class="stat-info">
+                        <span class="stat-value" id="statAvgBurnout">0%</span>
+                        <span class="stat-label">Avg Burnout Score</span>
+                    </div>
+                </div>
+                <div class="stat-card" id="stat-high">
+                    <div class="stat-icon rose"><i data-lucide="alert-triangle"></i></div>
+                    <div class="stat-info">
+                        <span class="stat-value" id="statHighRisk">0</span>
+                        <span class="stat-label">High Risk</span>
+                    </div>
+                </div>
+                <div class="stat-card" id="stat-low">
+                    <div class="stat-icon emerald"><i data-lucide="heart-pulse"></i></div>
+                    <div class="stat-info">
+                        <span class="stat-value" id="statLowRisk">0</span>
+                        <span class="stat-label">Healthy</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <h2 class="section-title">Quick Actions</h2>
+            <div class="quick-actions">
+                <a href="#add" class="action-card" data-nav="add">
+                    <div class="action-icon blue"><i data-lucide="user-plus"></i></div>
+                    <h3>Add Employee</h3>
+                    <p>Register a new team member</p>
+                </a>
+                <a href="#employees" class="action-card" data-nav="employees">
+                    <div class="action-icon emerald"><i data-lucide="scan-search"></i></div>
+                    <h3>Check Burnout</h3>
+                    <p>Analyze individual burnout risk</p>
+                </a>
+                <a href="#analytics" class="action-card" data-nav="analytics">
+                    <div class="action-icon amber"><i data-lucide="pie-chart"></i></div>
+                    <h3>View Analytics</h3>
+                    <p>Explore team wellness data</p>
+                </a>
+            </div>
+
+            <!-- Recent Employees -->
+            <h2 class="section-title">Recent Employees</h2>
+            <div class="recent-employees" id="recentEmployees">
+                <div class="empty-state">
+                    <i data-lucide="inbox"></i>
+                    <p>No employees yet. Add your first employee or load sample data.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== ADD EMPLOYEE PAGE ===== -->
+        <section class="page" id="page-add">
+            <div class="page-header">
+                <div>
+                    <h1 class="page-title">Add Employee</h1>
+                    <p class="page-subtitle">Register a new team member for burnout monitoring</p>
+                </div>
+            </div>
+
+            <div class="form-card">
+                <form id="addEmployeeForm" autocomplete="off">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="emp-name">Full Name</label>
+                            <div class="input-wrapper">
+                                <i data-lucide="user"></i>
+                                <input type="text" id="emp-name" placeholder="e.g. Jane Smith" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="emp-department">Department</label>
+                            <div class="input-wrapper">
+                                <i data-lucide="building-2"></i>
+                                <input type="text" id="emp-department" placeholder="e.g. Engineering" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="emp-weekly-hours">Weekly Work Hours</label>
+                            <div class="input-wrapper">
+                                <i data-lucide="clock"></i>
+                                <input type="number" id="emp-weekly-hours" placeholder="e.g. 40" min="0" max="168"
+                                    required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="emp-overtime">Overtime Hours</label>
+                            <div class="input-wrapper">
+                                <i data-lucide="timer"></i>
+                                <input type="number" id="emp-overtime" placeholder="e.g. 5" min="0" max="80" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="emp-tasks">Tasks Completed</label>
+                            <div class="input-wrapper">
+                                <i data-lucide="check-square"></i>
+                                <input type="number" id="emp-tasks" placeholder="e.g. 15" min="0" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="emp-meeting">Meeting Hours</label>
+                            <div class="input-wrapper">
+                                <i data-lucide="video"></i>
+                                <input type="number" id="emp-meeting" placeholder="e.g. 8" min="0" max="80" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="emp-leave">Leave Days (Last 3 Months)</label>
+                            <div class="input-wrapper">
+                                <i data-lucide="calendar-off"></i>
+                                <input type="number" id="emp-leave" placeholder="e.g. 3" min="0" max="90" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="emp-performance">Performance Score</label>
+                            <div class="input-wrapper">
+                                <i data-lucide="star"></i>
+                                <input type="number" id="emp-performance" placeholder="e.g. 4.2" min="0" max="5"
+                                    step="0.1" required>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-lg" id="submitEmployeeBtn">
+                        <i data-lucide="plus-circle"></i>
+                        <span>Add Employee</span>
+                        <div class="btn-loader" style="display:none;">
+                            <div class="spinner"></div>
+                        </div>
+                    </button>
+                </form>
+            </div>
+        </section>
+
+        <!-- ===== EMPLOYEES PAGE ===== -->
+        <section class="page" id="page-employees">
+            <div class="page-header">
+                <div>
+                    <h1 class="page-title">Employees</h1>
+                    <p class="page-subtitle">Manage and monitor your team</p>
+                </div>
+                <div class="toolbar">
+                    <button class="btn btn-secondary btn-sm" id="exportCsvBtn">
+                        <i data-lucide="download"></i><span>Export CSV</span>
+                    </button>
+                    <button class="btn btn-danger btn-sm" id="clearAllBtn">
+                        <i data-lucide="trash-2"></i><span>Clear All</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="search-bar">
+                <i data-lucide="search"></i>
+                <input type="text" id="employeeSearch" placeholder="Search by name, department, or ID…">
+            </div>
+
+            <div class="employees-grid" id="employeesGrid" style="margin-top:16px">
+                <div class="empty-state">
+                    <i data-lucide="users"></i>
+                    <p>No employees found. Start by adding employees.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== ANALYTICS PAGE ===== -->
+        <section class="page" id="page-analytics">
+            <div class="page-header">
+                <div>
+                    <h1 class="page-title">Analytics</h1>
+                    <p class="page-subtitle">Team wellness insights and trends</p>
+                </div>
+            </div>
+
+            <!-- Filter Controls -->
+            <div class="filter-bar" id="analyticsFilters">
+                <div class="filter-group">
+                    <label>Department</label>
+                    <select class="filter-select" id="filterDepartment">
+                        <option value="all">All Departments</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Employee ID</label>
+                    <input type="number" class="filter-input" id="filterEmpId" placeholder="Search by ID…"
+                        style="min-width:140px">
+                </div>
+                <div class="filter-group">
+                    <label>Risk Level</label>
+                    <div class="filter-chip-row">
+                        <button class="filter-chip active" data-risk="all">All</button>
+                        <button class="filter-chip" data-risk="high">High</button>
+                        <button class="filter-chip" data-risk="medium">Medium</button>
+                        <button class="filter-chip" data-risk="low">Low</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Summary Stats -->
+            <div class="summary-row" id="analyticsSummary"></div>
+
+            <!-- Risk Distribution -->
+            <div class="chart-card" style="margin-bottom:20px">
+                <h3 class="chart-title"><i data-lucide="signal"></i> Risk Distribution</h3>
+                <div class="risk-dist-bar" id="riskDistBar"></div>
+                <div class="risk-dist-legend" id="riskDistLegend"></div>
+            </div>
+
+            <!-- Charts -->
+            <div class="analytics-grid">
+                <div class="chart-card">
+                    <h3 class="chart-title"><i data-lucide="bar-chart-3"></i> Burnout Scores by Employee</h3>
+                    <div class="chart-container">
+                        <canvas id="burnoutBarChart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-card">
+                    <h3 class="chart-title"><i data-lucide="pie-chart"></i> Department Distribution</h3>
+                    <div class="chart-container">
+                        <canvas id="deptPieChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Workload Heatmap -->
+            <div class="heatmap-card" style="margin-top:20px">
+                <h3 class="chart-title"><i data-lucide="flame"></i> Workload Heatmap</h3>
+                <div class="heatmap-grid" id="workloadHeatmap"></div>
+            </div>
+
+            <!-- Ranking -->
+            <div class="chart-card full-width" style="margin-top:20px">
+                <h3 class="chart-title"><i data-lucide="list-ordered"></i> Burnout Risk Ranking</h3>
+                <div class="ranking-list" id="rankingList">
+                    <div class="empty-state small">
+                        <p>No analytics data available yet.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modal Overlay -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Details</h2>
+                <button class="modal-close" id="modalClose" aria-label="Close modal">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- Dynamically populated -->
+            </div>
+        </div>
     </div>
 
-    <div class="card">
-        <h2>Employees</h2>
-        <div id="employeeList"></div>
-    </div>
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
 
     <script src="script.js"></script>
 </body>
+
 </html>

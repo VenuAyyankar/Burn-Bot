@@ -1,4 +1,6 @@
 from pydantic import BaseModel
+from typing import Optional
+from datetime import datetime
 
 class EmployeeCreate(BaseModel):
     name: str
@@ -9,9 +11,22 @@ class EmployeeCreate(BaseModel):
     meeting_hours: float
     leave_days_last_3_months: int
     performance_score: float
+    dataset_id: Optional[int] = None
 
 class EmployeeResponse(EmployeeCreate):
     id: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True
+
+class DatasetCreate(BaseModel):
+    name: str
+
+class DatasetResponse(BaseModel):
+    id: int
+    name: str
+    created_at: datetime
+    employee_count: int = 0
+
+    class Config:
+        from_attributes = True
